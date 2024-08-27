@@ -74,8 +74,9 @@ class App {
         if (e.key === 'Enter') {
           e.preventDefault();
           console.log(e);
-
+          form.classList.add('hidden');
           // Get type
+          map.on('click');
           const type = inputType.value;
           const distance = inputDistance.value;
           const duration = inputDuration.value;
