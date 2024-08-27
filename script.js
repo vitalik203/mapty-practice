@@ -62,8 +62,9 @@ class App {
         //   })
         // )
         .openPopup();
-        form.addEventListener()
+      // form.addEventListener();
       form.classList.remove('hidden');
+      map.off('click');
       form.addEventListener('keydown', e => {
         // e.preventDefault();
         // console.log(e);
@@ -81,7 +82,6 @@ class App {
 
           // If cycling
           if (type === 'cycling') {
-            .classList.toggle('hidden');
           }
 
           // If running
