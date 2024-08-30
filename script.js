@@ -107,10 +107,6 @@ class App {
       );
     }
   }
-  // addMarker(map, lat, lng) {
-
-  //   L.marker(lat, lng).addTo(map);
-  // } ////////////////////////////////////////////////////////////////////
   workOut(e) {
     if (form.classList.contains('hidden')) {
       e.preventDefault();
@@ -142,7 +138,10 @@ class App {
             );
             const { lat, lng } = this.coords;
             console.log(lat, lng);
-            L.marker([lat, lng]).addTo(this.mapAdd);
+            L.marker([lat, lng])
+              .addTo(this.mapAdd)
+              .bindPopup(`${type} Workout`)
+              .openPopup();
             form.classList.add('hidden');
             inputDistance.value = '';
             inputDuration.value = '';
@@ -168,7 +167,10 @@ class App {
             );
             const { lat, lng } = this.coords;
             console.log(lat, lng);
-            L.marker([lat, lng]).addTo(this.mapAdd);
+            L.marker([lat, lng])
+              .addTo(this.mapAdd)
+              .bindPopup(`${type} Workout`)
+              .openPopup();
             form.classList.add('hidden');
             inputDistance.value = '';
             inputDuration.value = '';
