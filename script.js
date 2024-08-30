@@ -12,18 +12,85 @@ const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const submitBtn = document.querySelector('.form__btn');
 
-class newWorkout {
-  constructor(distance, duration, cadence, elevation) {
+const workOutArray = [];
+
+class AddNewWorkout {
+  constructor(coords, type, distance, duration) {
+    this.coords = coords;
+    this.type = type;
     this.distance = distance;
     this.duration = duration;
-    this.cadence = cadence;
-    this.elevation = elevation;
   }
 }
+
+class Cycling extends AddNewWorkout {
+  constructor(coords, type, distance, duration, elevation) {
+    super(coords, type, distance, duration);
+    this.elevation = elevation;
+    this.calcSpeed();
+  }
+  calcSpeed() {
+    this.speed = this.distance / this.duration;
+  }
+}
+
+class Running extends AddNewWorkout {
+  constructor(coords, type, distance, duration, cadence) {
+    super(coords, type, distance, duration);
+    this.cadence = cadence;
+    this.calcPace();
+  }
+  calcPace() {
+    this.pace = this.duration / this.distance;
+  }
+}
+
 class App {
   constructor() {
     this.getCurrentLocation;
     this.loadMap;
+    this.newWorkOut;
+    this.workOut;
+    this.isFiniteArr;
+    this.addMarker;
+    //Handlers
+    form.addEventListener('submit', this.workOut.bind(this));
+    inputType.addEventListener('change', () => {
+      inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+      inputElevation
+        .closest('.form__row')
+        .classList.toggle('form__row--hidden');
+    });
+  }
+  coords;
+  newWorkOutArr = [];
+  mapAdd;
+  isFiniteArr(arr) {
+    arr.forEach(e => {
+      if (e < 0 || isFinite(e) === false) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+  }
+
+  newWorkOut(type, distance, duration, lastOne, coords, arr) {
+    if (type === 'running') {
+      const run = new Running(coords, type, distance, duration, lastOne);
+      workOutArray.push(run);
+      console.log(run);
+
+      // this.arr.push(run);
+    }
+
+    if (type === 'cycling') {
+      const cycl = new Cycling(coords, type, distance, duration, lastOne);
+      workOutArray.push(cycl);
+      console.log(cycl);
+
+      // this.arr.push(cycl);
+    }
   }
 
   getCurrentLocation() {
@@ -38,8 +105,84 @@ class App {
       );
     }
   }
+  // addMarker(map, lat, lng) {
+
+  //   L.marker(lat, lng).addTo(map);
+  // } ////////////////////////////////////////////////////////////////////
+  workOut(e) {
+    if (form.classList.contains('hidden')) {
+      e.preventDefault();
+      return;
+    } else {
+      e.preventDefault();
+      const type = inputType.value;
+      const distance = +inputDistance.value;
+      const duration = +inputDuration.value;
+      if (inputDistance.value === '' || inputDuration.value === '') {
+        alert('Fill data first!');
+      } else if (distance < 0 || duration < 0) {
+        alert('Data should be positive!');
+      } else {
+        // If running
+        if (type === 'running') {
+          const cadence = +inputCadence.value;
+          if (!this.isFiniteArr([distance, duration, cadence]) === false) {
+            alert('Numbers must be positive!');
+          } else {
+            alert('All is good');
+            this.newWorkOut(
+              type,
+              distance,
+              duration,
+              cadence,
+              this.coords,
+              this.newWorkOutArr
+            );
+            const { lat, lng } = this.coords;
+            console.log(lat, lng);
+
+            // this.addMarker(this.mapAdd, lat, lng);////////////////////////////////////
+            form.classList.add('hidden');
+            inputDistance.value = '';
+            inputDuration.value = '';
+            inputCadence.value = '';
+            console.log(workOutArray);
+          }
+        }
+
+        //If cycling
+        if (type === 'cycling') {
+          const elevation = +inputElevation.value;
+          if (!this.isFiniteArr([distance, duration, elevation]) === false) {
+            alert('Numbers must be positive!');
+          } else {
+            alert('All is good');
+            this.newWorkOut(
+              type,
+              distance,
+              duration,
+              elevation,
+              this.coords,
+              this.newWorkOutArr
+            );
+            const { lat, lng } = this.coords;
+            console.log(lat, lng);
+
+            // this.addMarker(this.mapAdd, lat, lng); ///////////////////////////////////////
+            form.classList.add('hidden');
+            inputDistance.value = '';
+            inputDuration.value = '';
+            inputElevation.value = '';
+            console.log(workOutArray);
+          }
+        }
+      }
+    }
+  }
   loadMap(latitude, longitude) {
     const map = L.map('map').setView([latitude, longitude], 13);
+    this.mapAdd = map;
+    L.marker([latitude, longitude]).addTo(map);
 
     const googleStreets = L.tileLayer(
       'http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
@@ -53,167 +196,11 @@ class App {
 
     map.on('click', el => {
       const { lat, lng } = el.latlng;
-      L.marker([lat, lng])
-        .addTo(map)
-        // .bindPopup(
-        //   'Current position',
-        //   L.popup({
-        //     autoClose: false,
-        //   })
-        // )
-        .openPopup();
-      // form.addEventListener();
+      this.coords = el.latlng;
       form.classList.remove('hidden');
-      map.off('click');
-      form.addEventListener('keydown', e => {
-        // e.preventDefault();
-        // console.log(e);
-
-        // console.log(e);
-
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          console.log(e);
-          form.classList.add('hidden');
-          // Get type
-          map.on('click');
-          const type = inputType.value;
-          const distance = inputDistance.value;
-          const duration = inputDuration.value;
-
-          // If cycling
-          if (type === 'cycling') {
-          }
-
-          // If running
-
-          if (type === 'running') {
-            inputElevation.classList.toggle('hidden');
-          }
-
-          // Check if values arent negative
-
-          // Create object
-
-          // Add object into array
-
-          //   form.classList.add('hidden');
-        }
-      });
-      //   console.log(e.latlng);
-      //   const { lat, lng } = e.latlng;
-      //   L.marker([lat, lng])
-      //     .addTo(map)
-      //     .bindPopup(
-      //       'Current position',
-      //       L.popup({
-      //         autoClose: false,
-      //       })
-      //     )
-      //     .openPopup();
+      inputDistance.focus();
     });
   }
-  //   cycling(dis, dur, sp, elev, container) {
-  //     container.insertAdjacentHTML(
-  //       'beforeend',
-  //       `<li class="workout workout--cycling" data-id="1234567891">
-  //             <h2 class="workout__title">Cycling on April 5</h2>
-  //             <div class="workout__details">
-  //               <span class="workout__icon">🚴‍♀️</span>
-  //               <span class="workout__value">${dis}</span>
-  //               <span class="workout__unit">km</span>
-  //             </div>
-  //             <div class="workout__details">
-  //               <span class="workout__icon">⏱</span>
-  //               <span class="workout__value">${dur}</span>
-  //               <span class="workout__unit">min</span>
-  //             </div>
-  //             <div class="workout__details">
-  //               <span class="workout__icon">⚡️</span>
-  //               <span class="workout__value">${sp}</span>
-  //               <span class="workout__unit">km/h</span>
-  //             </div>
-  //             <div class="workout__details">
-  //               <span class="workout__icon">⛰</span>
-  //               <span class="workout__value">${elev}</span>
-  //               <span class="workout__unit">m</span>
-  //             </div>
-  //           </li>`
-  //     );
-  //   }
-
-  //   running(dis, dur, sp, elev, container) {
-  //     // container.insertAdjacentHTML(
-  //     //   'beforeend',
-
-  //     // );
-  //     let workoutDiv = document.createElement('div');
-  //     workoutDiv.textContent = `<li class="workout workout--running" data-id="1234567890">
-  //     <h2 class="workout__title">Running on April 14</h2>
-  //     <div class="workout__details">
-  //       <span class="workout__icon">🏃‍♂️</span>
-  //       <span class="workout__value">${dis}</span>
-  //       <span class="workout__unit">km</span>
-  //     </div>
-  //     <div class="workout__details">
-  //       <span class="workout__icon">⏱</span>
-  //       <span class="workout__value">${dur}</span>
-  //       <span class="workout__unit">min</span>
-  //     </div>
-  //     <div class="workout__details">
-  //       <span class="workout__icon">⚡️</span>
-  //       <span class="workout__value">${sp}</span>
-  //       <span class="workout__unit">min/km</span>
-  //     </div>
-  //     <div class="workout__details">
-  //       <span class="workout__icon">🦶🏼</span>
-  //       <span class="workout__value">${elev}</span>
-  //       <span class="workout__unit">spm</span>
-  //     </div>
-  //   </li>`;
-  //     container.append(workoutDiv);
-  //   }
-  //   newMarker(map) {
-  //     map.on('click', e => {
-  //       if (form.classList.contains('hidden')) {
-  //         const { lat, lng } = e.latlng;
-  //         L.marker([lat, lng]).addTo(map);
-  //         form.classList.remove('hidden');
-  //         form.addEventListener('submit', e => {
-  //           e.preventDefault();
-  //           if ((e.key = 'Enter')) {
-  //             form.classList.add('hidden');
-  //             let type = inputType.value;
-  //             console.log(type);
-  //             const distance = inputDistance.value;
-  //             const duration = inputDuration.value;
-  //             const cadence = inputCadence.value;
-  //             const elevation = inputElevation.value;
-  //             L.marker([lat, lng]).addTo(map).bindPopup().openPopup();
-  //             if (type === 'cycling') {
-  //               this.cycling(
-  //                 distance,
-  //                 duration,
-  //                 cadence,
-  //                 elevation,
-  //                 containerWorkouts
-  //               );
-  //               preventDefault();
-  //             } else {
-  //               this.running(
-  //                 distance,
-  //                 duration,
-  //                 cadence,
-  //                 elevation,
-  //                 containerWorkouts
-  //               );
-  //               preventDefault();
-  //             }
-  //           }
-  //         });
-  //       }
-  //     });
-  //   }
 }
 
 const app1 = new App();
