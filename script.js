@@ -55,6 +55,7 @@ class App {
     this.isFiniteArr;
     this.addMarker;
     this.mapAdd;
+    this.initialGetArray;
     //Handlers
     form.addEventListener('submit', this.workOut.bind(this));
     inputType.addEventListener('change', () => {
@@ -76,22 +77,27 @@ class App {
       }
     });
   }
-
+  initialGetArray() {
+    let outputArr = localStorage.getItem('arr');
+    outputArr = JSON.parse(outputArr);
+    outputArr.forEach(e => {
+      const { lat, lng } = e.coords;
+      L.marker([lat, lng]).addTo(this.mapAdd);
+    });
+  }
   newWorkOut(type, distance, duration, lastOne, coords) {
     if (type === 'running') {
-      const run = new Running(coords, type, distance, duration, lastOne);
+      const run = new Running(coords, type, distance, duration, lastOne, id);
       workOutArray.push(run);
+      localStorage.setItem('arr', JSON.stringify(workOutArray));
       console.log(run);
-
-      // this.arr.push(run);
     }
 
     if (type === 'cycling') {
-      const cycl = new Cycling(coords, type, distance, duration, lastOne);
+      const cycl = new Cycling(coords, type, distance, duration, lastOne, id);
       workOutArray.push(cycl);
+      localStorage.setItem('arr', JSON.stringify(workOutArray));
       console.log(cycl);
-
-      // this.arr.push(cycl);
     }
   }
 
@@ -121,6 +127,7 @@ class App {
       } else if (distance < 0 || duration < 0) {
         alert('Data should be positive!');
       } else {
+        // localStorage.remove(this.newWorkOutArr);
         // If running
         if (type === 'running') {
           const cadence = +inputCadence.value;
@@ -128,25 +135,61 @@ class App {
             alert('Numbers must be positive!');
           } else {
             alert('All is good');
+            idd = +`${Math.floor(Math.random() * 9)}${Math.floor(
+              Math.random() * 9
+            )}${Math.floor(Math.random() * 9)}`;
             this.newWorkOut(
               type,
               distance,
               duration,
               cadence,
               this.coords,
-              this.newWorkOutArr
+              this.newWorkOutArr,
+              idd
             );
             const { lat, lng } = this.coords;
             console.log(lat, lng);
+            const popupEx = L.popup({
+              autoClose: false,
+              closeOnClick: false,
+              content: `Workout ${type}`,
+            });
             L.marker([lat, lng])
               .addTo(this.mapAdd)
-              .bindPopup(`${type} Workout`)
+              .bindPopup(popupEx)
               .openPopup();
             form.classList.add('hidden');
             inputDistance.value = '';
             inputDuration.value = '';
             inputCadence.value = '';
             console.log(workOutArray);
+            console.log(id);
+
+            this.initialGetArray();
+
+            let html = `<li class="workout workout--${type}" data-id="1234567890">
+          <h2 class="workout__title">Running on April 14</h2>
+          <div class="workout__details">
+            <span class="workout__icon">${
+              type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
+            }</span>
+            <span class="workout__value">${distance}</span>
+            <span class="workout__unit">km</span>
+          </div>
+          <div class="workout__details">
+            <span class="workout__icon">⏱</span>
+            <span class="workout__value">${duration}</span>
+            <span class="workout__unit">min</span>
+          </div>
+          <div class="workout__details">
+            <span class="workout__icon">⚡️</span>
+            <span class="workout__value">${cadence}</span>
+            <span class="workout__unit">min/km</span>
+          </div>
+          </li>
+          `;
+
+            form.insertAdjacentHTML('afterend', html);
           }
         }
 
@@ -157,25 +200,59 @@ class App {
             alert('Numbers must be positive!');
           } else {
             alert('All is good');
+            idd = `${Math.floor(Math.random() * 9)}${Math.floor(
+              Math.random() * 9
+            )}${Math.floor(Math.random() * 9)}`;
             this.newWorkOut(
               type,
               distance,
               duration,
               elevation,
               this.coords,
-              this.newWorkOutArr
+              this.newWorkOutArr,
+              idd
             );
             const { lat, lng } = this.coords;
             console.log(lat, lng);
+            const popupEx = L.popup({
+              autoClose: false,
+              closeOnClick: false,
+              content: `Workout ${type}`,
+            });
             L.marker([lat, lng])
               .addTo(this.mapAdd)
-              .bindPopup(`${type} Workout`)
+              .bindPopup(popupEx)
               .openPopup();
             form.classList.add('hidden');
             inputDistance.value = '';
             inputDuration.value = '';
             inputElevation.value = '';
             console.log(workOutArray);
+            this.initialGetArray();
+            console.log(id);
+
+            let html = `<li class="workout workout--${type}" data-id="1234567890">
+          <h2 class="workout__title">Running on April 14</h2>
+          <div class="workout__details">
+            <span class="workout__icon">${
+              type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
+            }</span>
+            <span class="workout__value">${distance}</span>
+            <span class="workout__unit">km</span>
+          </div>
+          <div class="workout__details">
+            <span class="workout__icon">⏱</span>
+            <span class="workout__value">${duration}</span>
+            <span class="workout__unit">min</span>
+          </div>
+          <div class="workout__details">
+            <span class="workout__icon">⛰</span>
+            <span class="workout__value">${elevation}</span>
+            <span class="workout__unit">m</span>
+          </div>
+        </li>
+          `;
+            form.insertAdjacentHTML('afterend', html);
           }
         }
       }
@@ -201,12 +278,6 @@ class App {
       this.coords = el.latlng;
       form.classList.remove('hidden');
       inputDistance.focus();
-    });
-  }
-  renderMarkers(arr, m) {
-    arr.forEach(e => {
-      const { lat, lng } = e.coords;
-      L.marker([lat, lng]).addTo(m);
     });
   }
 }
