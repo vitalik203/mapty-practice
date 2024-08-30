@@ -20,6 +20,7 @@ class AddNewWorkout {
     this.type = type;
     this.distance = distance;
     this.duration = duration;
+    this.renderMarkers;
   }
 }
 
@@ -53,6 +54,7 @@ class App {
     this.workOut;
     this.isFiniteArr;
     this.addMarker;
+    this.mapAdd;
     //Handlers
     form.addEventListener('submit', this.workOut.bind(this));
     inputType.addEventListener('change', () => {
@@ -75,7 +77,7 @@ class App {
     });
   }
 
-  newWorkOut(type, distance, duration, lastOne, coords, arr) {
+  newWorkOut(type, distance, duration, lastOne, coords) {
     if (type === 'running') {
       const run = new Running(coords, type, distance, duration, lastOne);
       workOutArray.push(run);
@@ -140,8 +142,7 @@ class App {
             );
             const { lat, lng } = this.coords;
             console.log(lat, lng);
-
-            // this.addMarker(this.mapAdd, lat, lng);////////////////////////////////////
+            L.marker([lat, lng]).addTo(this.mapAdd);
             form.classList.add('hidden');
             inputDistance.value = '';
             inputDuration.value = '';
@@ -167,8 +168,7 @@ class App {
             );
             const { lat, lng } = this.coords;
             console.log(lat, lng);
-
-            // this.addMarker(this.mapAdd, lat, lng); ///////////////////////////////////////
+            L.marker([lat, lng]).addTo(this.mapAdd);
             form.classList.add('hidden');
             inputDistance.value = '';
             inputDuration.value = '';
@@ -180,7 +180,7 @@ class App {
     }
   }
   loadMap(latitude, longitude) {
-    const map = L.map('map').setView([latitude, longitude], 13);
+    let map = L.map('map').setView([latitude, longitude], 13);
     this.mapAdd = map;
     L.marker([latitude, longitude]).addTo(map);
 
@@ -199,6 +199,12 @@ class App {
       this.coords = el.latlng;
       form.classList.remove('hidden');
       inputDistance.focus();
+    });
+  }
+  renderMarkers(arr, m) {
+    arr.forEach(e => {
+      const { lat, lng } = e.coords;
+      L.marker([lat, lng]).addTo(m);
     });
   }
 }
